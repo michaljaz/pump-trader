@@ -11,7 +11,7 @@ const SOLANA_HTTP_ENDPOINT = process.env.SOLANA_HTTP_ENDPOINT;
 let payer = null;
 
 if (!fs.existsSync(SOLANA_WALLET_PATH)) {
-  console.log("Generating a new keypair");
+  console.log("Generating a new keypair...");
 
   payer = Keypair.generate();
 
@@ -19,7 +19,7 @@ if (!fs.existsSync(SOLANA_WALLET_PATH)) {
 
   console.log(`Keypair saved to ${SOLANA_WALLET_PATH}`);
 } else {
-  console.log(`Reading keypair from ${SOLANA_WALLET_PATH}`);
+  console.log(`Reading keypair...`);
   try {
     const keypair = fs.readFileSync(SOLANA_WALLET_PATH, 'utf8');
     const keypairArray = JSON.parse(keypair);
@@ -48,7 +48,7 @@ var ws = new WebSocket('wss://frontend-api.pump.fun/socket.io/?EIO=4&transport=w
 // spy on pump.fun websocket and then subscribe to the token
 
 ws.on('open', function() {
-    console.log('Pump.fun socket opened!')
+    console.log('Listening for new token creation on pump.fun...')
 });
 
 ws.on('message', function(data, flags) {
@@ -60,7 +60,7 @@ ws.on('message', function(data, flags) {
     // console.log('Pinging...')
   }else if(message.startsWith('42')) {
     const parsed = JSON.parse(message.slice(2))
-    if(parsed[0]==='newCoinCreated'){
+    if(parsed[0] === 'newCoinCreated'){
       console.log('New token created!')
       console.log(`https://pump.fun/${parsed[1].mint} ${parsed[1].name}`)
       spyToken(parsed[1].mint)
@@ -70,12 +70,11 @@ ws.on('message', function(data, flags) {
 });
 
 const spyToken = async (mint) => {
-  console.log('Spying on token: ', mint)
+  console.log('Spying on token...')
   const ACCOUNT_TO_WATCH = new PublicKey(mint);
-  const subscriptionId = await connection.onLogs(ACCOUNT_TO_WATCH, async (updatedAccountInfo) => {
+  await connection.onLogs(ACCOUNT_TO_WATCH, async (updatedAccountInfo) => {
     if (!updatedAccountInfo.err) {
       console.log(updatedAccountInfo.signature)
     }
   }, "confirmed");
-  console.log('Starting web socket, subscription ID: ', subscriptionId);
 }
