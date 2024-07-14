@@ -1,13 +1,14 @@
 require('dotenv').config();
-const { Keypair, Connection, PublicKey, Transaction } = require("@solana/web3.js");
 const fs = require('fs');
+const { Keypair, Connection, PublicKey } = require("@solana/web3.js");
 
-let payer = null;
 const SOLANA_WALLET_PATH = process.env.SOLANA_WALLET_PATH;
 const SOLANA_WSS_ENDPOINT = process.env.SOLANA_WSS_ENDPOINT;
 const SOLANA_HTTP_ENDPOINT = process.env.SOLANA_HTTP_ENDPOINT;
 
 // setup wallet
+
+let payer = null;
 
 if (!fs.existsSync(SOLANA_WALLET_PATH)) {
   console.log("Generating a new keypair");
@@ -73,8 +74,7 @@ const spyToken = async (mint) => {
   const ACCOUNT_TO_WATCH = new PublicKey(mint);
   const subscriptionId = await connection.onLogs(ACCOUNT_TO_WATCH, async (updatedAccountInfo) => {
     if (!updatedAccountInfo.err) {
-      const { signature, logs } = updatedAccountInfo
-      console.log(signature)
+      console.log(updatedAccountInfo.signature)
     }
   }, "confirmed");
   console.log('Starting web socket, subscription ID: ', subscriptionId);
