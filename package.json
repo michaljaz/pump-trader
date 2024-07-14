@@ -3,13 +3,12 @@
   "version": "1.0.0",
   "main": "index.js",
   "scripts": {
-    "start": "node index.js",
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "start": "node index.js"
   },
-  "keywords": [],
-  "author": "",
+  "keywords": ["solana", "dex", "trading", "bot", "ai"],
+  "author": "Michał Jażdżyk",
   "license": "Apache-2.0",
-  "description": "",
+  "description": "Simple and smart solana ai bot, that trades tokens on multiple DEX'es",
   "dependencies": {
     "@solana/web3.js": "^1.95.0",
     "bs58": "^6.0.0",
