@@ -1,5 +1,5 @@
 require('dotenv').config();
-const { Keypair, Connection, PublicKey } = require("@solana/web3.js");
+const { Keypair, Connection, PublicKey, LAMPORTS_PER_SOL } = require("@solana/web3.js");
 const fs = require('fs');
 
 let payer = null;
@@ -51,5 +51,16 @@ const checkBalance = async () => {
 }
 
 checkBalance();
+
+(async()=>{
+    const ACCOUNT_TO_WATCH = new PublicKey('CKu1F5sWUTeEy3NaBc2TxAK9NFRCS5srjFhPynXZ2ENt'); // Replace with your own Wallet Address
+    const subscriptionId = await connection.onAccountChange(
+        ACCOUNT_TO_WATCH,
+        (updatedAccountInfo) =>
+            console.log(`---Event Notification for ${ACCOUNT_TO_WATCH.toString()}--- \nNew Account Balance:`, updatedAccountInfo.lamports / LAMPORTS_PER_SOL, ' SOL'),
+        "confirmed"
+    );
+    console.log('Starting web socket, subscription ID: ', subscriptionId);
+})()
 
 // fetchSPLTokens();
