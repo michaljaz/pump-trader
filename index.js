@@ -1,5 +1,5 @@
 require('dotenv').config();
-const { Keypair } = require("@solana/web3.js");
+const { Keypair, Connection, clusterApiUrl } = require("@solana/web3.js");
 const fs = require('fs');
 
 let payer = null;
@@ -16,7 +16,6 @@ if (!fs.existsSync(SOLANA_WALLET_PATH)) {
 } else {
   console.log(`Reading keypair from ${SOLANA_WALLET_PATH}`);
   try {
-
     const keypair = fs.readFileSync(SOLANA_WALLET_PATH, 'utf8');
     const keypairArray = JSON.parse(keypair);
 
@@ -34,5 +33,9 @@ if (!fs.existsSync(SOLANA_WALLET_PATH)) {
   }
 }
 
-console.log("Public Key:", payer.publicKey.toString());
-console.log("Secret Key:", payer.secretKey)
+// console.log("Public Key:", payer.publicKey.toString());
+// console.log("Secret Key:", payer.secretKey)
+
+const connection = new Connection(clusterApiUrl('mainnet-beta'));
+
+console.log(connection)
