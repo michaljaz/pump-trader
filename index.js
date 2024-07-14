@@ -38,7 +38,7 @@ if (!fs.existsSync(SOLANA_WALLET_PATH)) {
 // console.log("Public Key:", payer.publicKey.toString());
 // console.log("Secret Key:", payer.secretKey)
 
-const connection = new Connection(SOLANA_HTTP_ENDPOINT);
+const connection = new Connection(SOLANA_HTTP_ENDPOINT, {wsEndpoint: SOLANA_WSS_ENDPOINT});
 
 const fetchSPLTokens = async () => {
   const tokenAccounts = await connection.getTokenAccountsByOwner(payer.publicKey, { programId: new PublicKey("TokenkegQfeZyiNwAJbNbGKPFXCWuBvf9Ss623VQ5DA") });
