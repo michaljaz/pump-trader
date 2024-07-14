@@ -8,19 +8,21 @@ const fs = require('fs');
 
 let payer = null;
 
-if (!fs.existsSync('./key.json')) {
+const SOLANA_WALLET_PATH = process.env.SOLANA_WALLET_PATH;
 
-  // if key.json doesn't exist, create a new keypair and save it to key.json
+if (!fs.existsSync(SOLANA_WALLET_PATH)) {
+
+  console.log("Generating a new keypair");
 
   payer = Keypair.generate();
 
-  fs.writeFileSync('./key.json', JSON.stringify(Array.from(payer.secretKey)));
+  fs.writeFileSync(SOLANA_WALLET_PATH, JSON.stringify(Array.from(payer.secretKey)));
 
 } else {
 
-  // if key.json exists, read the secret key from key.json
+  console.log(`Reading keypair from ${SOLANA_WALLET_PATH}`);
 
-  const secretKey = fs.readFileSync('./key.json', 'utf8');
+  const secretKey = fs.readFileSync(SOLANA_WALLET_PATH, 'utf8');
 
   payer = Keypair.fromSecretKey(Uint8Array.from(JSON.parse(secretKey)));
 
