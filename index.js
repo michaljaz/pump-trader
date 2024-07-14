@@ -1,5 +1,5 @@
 require('dotenv').config();
-const { Keypair, Connection, clusterApiUrl } = require("@solana/web3.js");
+const { Keypair, Connection, clusterApiUrl, PublicKey } = require("@solana/web3.js");
 const fs = require('fs');
 
 let payer = null;
@@ -38,4 +38,9 @@ if (!fs.existsSync(SOLANA_WALLET_PATH)) {
 
 const connection = new Connection(clusterApiUrl('mainnet-beta'));
 
-console.log(connection)
+const fetchSPLTokens = async () => {
+  const tokenAccounts = await connection.getTokenAccountsByOwner(payer.publicKey, { programId: new PublicKey("TokenkegQfeZyiNwAJbNbGKPFXCWuBvf9Ss623VQ5DA") });
+  console.log(tokenAccounts)
+}
+
+fetchSPLTokens();
