@@ -43,4 +43,11 @@ const fetchSPLTokens = async () => {
   console.log(tokenAccounts)
 }
 
-fetchSPLTokens();
+const checkBalance = async () => {
+    const balance = await connection.getBalance(payer.publicKey);
+    console.log(`Current balance: ${balance / 1e9} SOL`);
+}
+
+checkBalance();
+
+// fetchSPLTokens();
