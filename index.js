@@ -57,7 +57,6 @@ ws.on('message', function(data, flags) {
     ws.send(40)
   }else if(message === '2'){
     ws.send(3)
-    // console.log('Pinging...')
   }else if(message.startsWith('42')) {
     const parsed = JSON.parse(message.slice(2))
     if(parsed[0] === 'newCoinCreated'){
