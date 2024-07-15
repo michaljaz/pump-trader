@@ -66,23 +66,23 @@ const pumpFunBuy = async (mint, amount) => {
 };
 
 const pumpFunSell = async (mint, amount) => {
-    const url = "https://pumpapi.fun/api/trade";
-    const data = {
-        trade_type: "sell",
-        mint,
-        amount, // Amount in tokens
-        slippage: 5,
-        priorityFee: 0.003, // Adjust priority fee if needed
-        userPrivateKey: bs58.encode(privateKey)
-    };
+  const url = "https://pumpapi.fun/api/trade";
+  const data = {
+    trade_type: "sell",
+    mint,
+    amount, // Amount in tokens
+    slippage: 5,
+    priorityFee: 0.003, // Adjust priority fee if needed
+    userPrivateKey: bs58.encode(privateKey)
+  };
 
-    try {
-        const response = await axios.post(url, data);
-        return response.data.tx_hash;
-    } catch (error) {
-        console.error(`Error executing sell transaction: ${error.message}`, error.response?.data);
-        return null;
-    }
+  try {
+    const response = await axios.post(url, data);
+    return response.data.tx_hash;
+  } catch (error) {
+    console.error(`Error executing sell transaction: ${error.message}`, error.response?.data);
+    return null;
+  }
 };
 
 // pumpFunBuy('7Hp41zY9MB2hozupgMB9PuPcnLtMsXJ5fwuCqscApump', 0.1)
