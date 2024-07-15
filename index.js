@@ -1,9 +1,10 @@
-import dotenv from 'dotenv';
 import fs from 'fs';
-import { Keypair, Connection, PublicKey } from "@solana/web3.js";
-import axios from 'axios';
 import bs58 from 'bs58';
+import axios from 'axios';
 import WebSocket from 'ws';
+import dotenv from 'dotenv';
+import { Keypair, Connection, PublicKey } from "@solana/web3.js";
+
 dotenv.config();
 
 const SOLANA_WALLET_PATH = process.env.SOLANA_WALLET_PATH;
@@ -45,6 +46,8 @@ if (!fs.existsSync(SOLANA_WALLET_PATH)) {
   }
 }
 
+// reactive functions
+
 const pumpFunBuy = async (mint, amount) => {
   const url = "https://pumpapi.fun/api/trade";
   const data = {
@@ -84,8 +87,6 @@ const pumpFunSell = async (mint, amount) => {
     return null;
   }
 };
-
-// pumpFunBuy('7Hp41zY9MB2hozupgMB9PuPcnLtMsXJ5fwuCqscApump', 0.1)
 
 // setup connection
 
