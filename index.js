@@ -10,8 +10,6 @@ const SOLANA_WALLET_PATH = process.env.SOLANA_WALLET_PATH;
 const SOLANA_WSS_ENDPOINT = process.env.SOLANA_WSS_ENDPOINT;
 const SOLANA_HTTP_ENDPOINT = process.env.SOLANA_HTTP_ENDPOINT;
 
-const PRIORITY_FEE_BASE = 0.0003; // Base priority fee
-
 // setup wallet
 
 let privateKey;
@@ -54,7 +52,7 @@ const pumpFunBuy = async (mint, amount) => {
     mint,
     amount,
     slippage: 5,
-    priorityFee: PRIORITY_FEE_BASE,
+    priorityFee: 0.0003,
     userPrivateKey: bs58.encode(privateKey)
   };
 
@@ -67,7 +65,27 @@ const pumpFunBuy = async (mint, amount) => {
   }
 };
 
-pumpFunBuy('7Hp41zY9MB2hozupgMB9PuPcnLtMsXJ5fwuCqscApump', 0.1)
+const pumpFunSell = async (mint, amount) => {
+    const url = "https://pumpapi.fun/api/trade";
+    const data = {
+        trade_type: "sell",
+        mint,
+        amount, // Amount in tokens
+        slippage: 5,
+        priorityFee: 0.003, // Adjust priority fee if needed
+        userPrivateKey: bs58.encode(privateKey)
+    };
+
+    try {
+        const response = await axios.post(url, data);
+        return response.data.tx_hash;
+    } catch (error) {
+        console.error(`Error executing sell transaction: ${error.message}`, error.response?.data);
+        return null;
+    }
+};
+
+// pumpFunBuy('7Hp41zY9MB2hozupgMB9PuPcnLtMsXJ5fwuCqscApump', 0.1)
 
 // setup connection
 
