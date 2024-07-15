@@ -1,21 +1,30 @@
-require('dotenv').config();
-const fs = require('fs');
-const { Keypair, Connection, PublicKey } = require("@solana/web3.js");
+import dotenv from 'dotenv';
+import fs from 'fs';
+import { Keypair, Connection, PublicKey } from "@solana/web3.js";
+import axios from 'axios';
+import bs58 from 'bs58';
+import WebSocket from 'ws';
+dotenv.config();
 
 const SOLANA_WALLET_PATH = process.env.SOLANA_WALLET_PATH;
 const SOLANA_WSS_ENDPOINT = process.env.SOLANA_WSS_ENDPOINT;
 const SOLANA_HTTP_ENDPOINT = process.env.SOLANA_HTTP_ENDPOINT;
 
+const PRIORITY_FEE_BASE = 0.0003; // Base priority fee
+
 // setup wallet
 
-let payer = null;
+let privateKey;
+let payer;
 
 if (!fs.existsSync(SOLANA_WALLET_PATH)) {
   console.log("Generating a new keypair...");
 
   payer = Keypair.generate();
 
-  fs.writeFileSync(SOLANA_WALLET_PATH, JSON.stringify(Array.from(payer.secretKey)));
+  privateKey = payer.secretKey;
+
+  fs.writeFileSync(SOLANA_WALLET_PATH, JSON.stringify(Array.from(privateKey)));
 
   console.log(`Keypair saved to ${SOLANA_WALLET_PATH}`);
 } else {
@@ -25,7 +34,7 @@ if (!fs.existsSync(SOLANA_WALLET_PATH)) {
     const keypairArray = JSON.parse(keypair);
 
     if (Array.isArray(keypairArray)) {
-      const privateKey = Uint8Array.from(keypairArray);
+      privateKey = Uint8Array.from(keypairArray);
       payer = Keypair.fromSecretKey(privateKey);
 
       console.log('Private key loaded from keypair file');
@@ -38,12 +47,32 @@ if (!fs.existsSync(SOLANA_WALLET_PATH)) {
   }
 }
 
+const pumpFunBuy = async (mint, amount) => {
+  const url = "https://pumpapi.fun/api/trade";
+  const data = {
+    trade_type: "buy",
+    mint,
+    amount,
+    slippage: 5,
+    priorityFee: PRIORITY_FEE_BASE,
+    userPrivateKey: bs58.encode(privateKey)
+  };
+
+  try {
+    const response = await axios.post(url, data);
+    return response.data.tx_hash;
+  } catch (error) {
+    console.log(`Error executing buy transaction: ${error.message}`);
+    return null;
+  }
+};
+
+pumpFunBuy('7Hp41zY9MB2hozupgMB9PuPcnLtMsXJ5fwuCqscApump', 0.1)
+
 // setup connection
 
 const connection = new Connection(SOLANA_HTTP_ENDPOINT, {wsEndpoint: SOLANA_WSS_ENDPOINT});
-
-var WebSocket = require('ws');
-var ws = new WebSocket('wss://frontend-api.pump.fun/socket.io/?EIO=4&transport=websocket');
+const ws = new WebSocket('wss://frontend-api.pump.fun/socket.io/?EIO=4&transport=websocket');
 
 // spy on pump.fun websocket and then subscribe to the token
 

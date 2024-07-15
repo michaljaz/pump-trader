@@ -12,11 +12,13 @@
     "bot",
     "ai"
   ],
+  "type": "module",
   "author": "Michał Jażdżyk",
   "license": "Apache-2.0",
   "description": "Simple and smart solana ai bot, that trades tokens on multiple DEX'es",
   "dependencies": {
     "@solana/web3.js": "^1.95.0",
+    "axios": "^1.7.2",
     "bs58": "^6.0.0",
     "dotenv": "^16.4.5",
     "ws": "^8.18.0"
