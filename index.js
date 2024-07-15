@@ -1,6 +1,4 @@
 import fs from 'fs';
-import bs58 from 'bs58';
-import axios from 'axios';
 import WebSocket from 'ws';
 import dotenv from 'dotenv';
 import { Keypair, Connection, PublicKey } from "@solana/web3.js";
@@ -77,7 +75,7 @@ ws.on('message', function(data, flags) {
       console.log(`https://pump.fun/${mint} ${name}`)
       spying = mint
       ws.send('42["joinTradeRoom",{"mint":"'+spying+'"}]')
-    } else if (type === `tradeCreated:${spying}` || (type === 'tradeCreated' && mint === spying) && !saved[sig]) {
+    } else if ((type === `tradeCreated:${spying}` || (type === 'tradeCreated' && mint === spying)) && !saved[signature.slice(0, 6)]) {
       const sig = signature.slice(0, 6)
       saved[sig] = true
       console.log(
