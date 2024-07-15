@@ -56,7 +56,6 @@ ws.on('open', function() {
 });
 
 let spying = false
-const saved = {}
 
 ws.on('message', function(data, flags) {
   const message = data.toString()
@@ -66,8 +65,10 @@ ws.on('message', function(data, flags) {
     ws.send(3)
   }else if(message.startsWith('42')) {
     const [type, {
-      mint, name, is_buy, sol_amount, username, signature
+      mint, name, is_buy, sol_amount, username, signature, token_amount
     }] = JSON.parse(message.slice(2))
+
+    
 
     
     if(type === 'newCoinCreated' && !spying){
@@ -75,15 +76,13 @@ ws.on('message', function(data, flags) {
       console.log(`https://pump.fun/${mint} ${name}`)
       spying = mint
       ws.send('42["joinTradeRoom",{"mint":"'+spying+'"}]')
-    } else if ((type === `tradeCreated:${spying}` || (type === 'tradeCreated' && mint === spying)) && !saved[signature.slice(0, 6)]) {
+    } else if ((type === `tradeCreated:${spying}` || (type === 'tradeCreated' && mint === spying))) {
+      // console.log(JSON.parse(message.slice(2))[1])
       const sig = signature.slice(0, 6)
-      saved[sig] = true
       console.log(
         is_buy ? 'BUY\t' : 'SELL\t',
-        `"${name}" at`,
-        sol_amount * 0.000000001,
-        'by',
-        username,
+        `"${name}" at ${(sol_amount * 0.000000001).toFixed(4)} SOL`,
+        `(${((sol_amount * 0.000000001) / (token_amount / 1e6))})`,
         sig
       )
     }
