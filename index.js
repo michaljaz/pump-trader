@@ -57,6 +57,9 @@ ws.on('open', function() {
     console.log('Listening for new token creation on pump.fun...')
 });
 
+let spying = false
+const saved = {}
+
 ws.on('message', function(data, flags) {
   const message = data.toString()
   if(message.startsWith('0')){
@@ -64,34 +67,27 @@ ws.on('message', function(data, flags) {
   }else if(message === '2'){
     ws.send(3)
   }else if(message.startsWith('42')) {
-    const parsed = JSON.parse(message.slice(2))
-    if(parsed[0] === 'newCoinCreated'){
+    const [type, {
+      mint, name, is_buy, sol_amount, username, signature
+    }] = JSON.parse(message.slice(2))
+
+    
+    if(type === 'newCoinCreated' && !spying){
       console.log('New token created!')
-      console.log(`https://pump.fun/${parsed[1].mint} ${parsed[1].name}`)
-      spyToken(parsed[1].mint)
-      ws.close()
+      console.log(`https://pump.fun/${mint} ${name}`)
+      spying = mint
+      ws.send('42["joinTradeRoom",{"mint":"'+spying+'"}]')
+    } else if (type === `tradeCreated:${spying}` || (type === 'tradeCreated' && mint === spying) && !saved[sig]) {
+      const sig = signature.slice(0, 6)
+      saved[sig] = true
+      console.log(
+        is_buy ? 'BUY\t' : 'SELL\t',
+        `"${name}" at`,
+        sol_amount * 0.000000001,
+        'by',
+        username,
+        sig
+      )
     }
   }
 });
-
-const spyToken = async (mint) => {
-  console.log('Spying on token...')
-  const ACCOUNT_TO_WATCH = new PublicKey(mint);
-  await connection.onLogs(ACCOUNT_TO_WATCH, async (updatedAccountInfo) => {
-    if (!updatedAccountInfo.err) {
-      const { logs, signature } = updatedAccountInfo;
-
-      let buys = 0
-      let sells = 0
-
-      for (let i in logs) {
-        if (logs[i] == 'Program log: Instruction: Buy') {
-          buys += 1
-        } else if(logs[i] == 'Program log: Instruction: Sell'){
-          sells += 1
-        }
-      }
-      console.log(signature, buys, sells)
-    }
-  }, "confirmed");
-}
