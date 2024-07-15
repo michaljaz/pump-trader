@@ -46,48 +46,6 @@ if (!fs.existsSync(SOLANA_WALLET_PATH)) {
   }
 }
 
-// reactive functions
-
-const pumpFunBuy = async (mint, amount) => {
-  const url = "https://pumpapi.fun/api/trade";
-  const data = {
-    trade_type: "buy",
-    mint,
-    amount,
-    slippage: 5,
-    priorityFee: 0.0003,
-    userPrivateKey: bs58.encode(privateKey)
-  };
-
-  try {
-    const response = await axios.post(url, data);
-    return response.data.tx_hash;
-  } catch (error) {
-    console.log(`Error executing buy transaction: ${error.message}`);
-    return null;
-  }
-};
-
-const pumpFunSell = async (mint, amount) => {
-  const url = "https://pumpapi.fun/api/trade";
-  const data = {
-    trade_type: "sell",
-    mint,
-    amount, // Amount in tokens
-    slippage: 5,
-    priorityFee: 0.003, // Adjust priority fee if needed
-    userPrivateKey: bs58.encode(privateKey)
-  };
-
-  try {
-    const response = await axios.post(url, data);
-    return response.data.tx_hash;
-  } catch (error) {
-    console.error(`Error executing sell transaction: ${error.message}`, error.response?.data);
-    return null;
-  }
-};
-
 // setup connection
 
 const connection = new Connection(SOLANA_HTTP_ENDPOINT, {wsEndpoint: SOLANA_WSS_ENDPOINT});
@@ -121,7 +79,19 @@ const spyToken = async (mint) => {
   const ACCOUNT_TO_WATCH = new PublicKey(mint);
   await connection.onLogs(ACCOUNT_TO_WATCH, async (updatedAccountInfo) => {
     if (!updatedAccountInfo.err) {
-      console.log(updatedAccountInfo.signature)
+      const { logs, signature } = updatedAccountInfo;
+
+      let buys = 0
+      let sells = 0
+
+      for (let i in logs) {
+        if (logs[i] == 'Program log: Instruction: Buy') {
+          buys += 1
+        } else if(logs[i] == 'Program log: Instruction: Sell'){
+          sells += 1
+        }
+      }
+      console.log(signature, buys, sells)
     }
   }, "confirmed");
 }
