@@ -1,7 +1,10 @@
 import fs from 'fs';
+import axios from 'axios';
 import WebSocket from 'ws';
 import dotenv from 'dotenv';
-import { Keypair, Connection, PublicKey } from "@solana/web3.js";
+import fetch from 'node-fetch';
+
+import { Keypair, Connection, PublicKey, VersionedTransaction } from "@solana/web3.js";
 
 dotenv.config();
 
@@ -45,6 +48,34 @@ if (!fs.existsSync(SOLANA_WALLET_PATH)) {
 const connection = new Connection(SOLANA_HTTP_ENDPOINT, {wsEndpoint: SOLANA_WSS_ENDPOINT});
 const ws = new WebSocket('wss://pumpportal.fun/api/data');
 
+const pumpRun = async (mint, action, amount) => {
+  const response = await fetch('https://pumpportal.fun/api/trade-local', {
+    method: 'POST',
+    headers: {
+      "Content-Type": "application/json"
+    },
+    body: JSON.stringify({
+      publicKey: payer.publicKey.toBase58(),
+      action,
+      mint,
+      amount: amount.toString(),
+      denominatedInSol: action === 'buy' ? 'true' : 'false',
+      slippage: 5,
+      priorityFee: 0.0003,
+      pool: 'pump'
+    })
+  })
+  if(response.status === 200){ 
+    const data = await response.arrayBuffer();
+    const tx = VersionedTransaction.deserialize(new Uint8Array(data));
+    console.log(tx)
+    tx.sign([payer]);
+    const signature = await connection.sendTransaction(tx)
+    console.log("Transaction: https://solscan.io/tx/" + signature);
+  } else {
+    console.log(response.statusText); // log error
+  }
+}
 
 ws.on('open', function() {
   ws.send(JSON.stringify({ "method": "subscribeNewToken" }))
@@ -55,10 +86,12 @@ let spying = false
 
 ws.on('message', function (data, flags) {
   data = JSON.parse(data.toString())
-  
+
   if (!data.message && !spying) {
     spying = data.mint
     console.log(`https://pump.fun/${data.mint}`)
+
+    pumpRun(data.mint, 'buy', 0.05)
 
     ws.send(JSON.stringify({"method": "unsubscribeNewToken"}))
     ws.send(JSON.stringify({"method": "subscribeTokenTrade", "keys": [spying]}))
