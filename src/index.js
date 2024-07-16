@@ -15,12 +15,20 @@ const PUMP_FUN_PROGRAM_ID = '6EF8rrecthR5Dkzon8Nwu78hRvfCKubJ14M5uBEwF6P';
 
 console.log(`Reading keypair...`);
 const payer = Keypair.fromSecretKey(bs58.decode(PRIVATE_KEY));
-
 console.log(payer.publicKey.toString());
 
-const connection = new Connection(SOLANA_HTTP_ENDPOINT, {wsEndpoint: SOLANA_WSS_ENDPOINT});
-const ws = new WebSocket('wss://pumpportal.fun/api/data');
+// const connection = new Connection(SOLANA_HTTP_ENDPOINT, {wsEndpoint: SOLANA_WSS_ENDPOINT});
+// const ws = new WebSocket('wss://pumpportal.fun/api/data');
 
+const buyTransaction = (mintAddress, amount) => {
+  console.log('Mint address:', mintAddress);
+  const programId = new PublicKey(PUMP_FUN_PROGRAM_ID);
+  const wallet = new Wallet(payer);
+  const mint = new PublicKey(mintAddress);
+
+  const [bondingCurve] = PublicKey.findProgramAddressSync([Buffer.from("bonding-curve"), new PublicKey(mintAddress).toBytes()], programId);
+  console.log('Bonding curve:', bondingCurve.toString());
+}
 
 const checkBalance = async () => {
     const balance = await connection.getBalance(payer.publicKey);
@@ -28,7 +36,7 @@ const checkBalance = async () => {
     return balance / 1e9;
 };
 
-checkBalance();
+buyTransaction('CZD2GNPPD3UZrLvYURhQZ2CEMkCXGRJQuzqYXqFgpump', 0.001)
 
 
 // ws.on('open', function() {
