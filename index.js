@@ -90,7 +90,7 @@ ws.on('message', function (data, flags) {
     spying = data.mint
     console.log(`https://pump.fun/${data.mint}`)
 
-    pumpRun(data.mint, 'buy', 0.05)
+    pumpRun(data.mint, 'buy', 0.01)
 
     ws.send(JSON.stringify({"method": "unsubscribeNewToken"}))
     ws.send(JSON.stringify({"method": "subscribeTokenTrade", "keys": [spying]}))
