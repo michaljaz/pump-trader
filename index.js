@@ -1,5 +1,4 @@
 import fs from 'fs';
-import axios from 'axios';
 import WebSocket from 'ws';
 import dotenv from 'dotenv';
 import fetch from 'node-fetch';
