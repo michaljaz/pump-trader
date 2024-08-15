@@ -77,21 +77,21 @@ const buyTransaction = async (mintAddress) => {
   const blockhash = await connection.getLatestBlockhash("finalized");
 
   // create transaction
-  // const message = {
-  //   ownerKey: owner.publicKey,
-  //   recentBlockhash: blockhash.blockhash,
-  //   instructions: instructions
-  // }
-  // console.log(message)
-  // const final_tx = new VersionedTransaction(new TransactionMessage(message).compileToV0Message());
-  // final_tx.sign([wallet.payer]);
 
-  // // send transaction
-  // const txid = await connection.sendTransaction(final_tx, {
-  //   skipPreflight: true,
-  // });
-  // await connection.confirmTransaction(txid);
-  // console.log(txid);
+  const message = {
+    payerKey: owner.publicKey,
+    recentBlockhash: blockhash.blockhash,
+    instructions: instructions
+  }
+  const final_tx = new VersionedTransaction(new TransactionMessage(message).compileToV0Message());
+  final_tx.sign([wallet.payer]);
+
+  // send transaction
+  const txid = await connection.sendTransaction(final_tx, {
+    skipPreflight: true,
+  });
+  await connection.confirmTransaction(txid);
+  console.log(txid);
 }
 
 
