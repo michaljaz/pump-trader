@@ -20,10 +20,9 @@
     "@coral-xyz/anchor": "^0.26.0",
     "@solana/spl-token": "^0.4.8",
     "@solana/web3.js": "^1.60.0",
-    "bn.js": "^5.2.1",
+    "axios": "^1.7.4",
     "bs58": "^6.0.0",
     "dotenv": "^16.4.5",
-    "node-fetch": "^3.3.2",
     "ws": "^8.18.0"
   }
 }
