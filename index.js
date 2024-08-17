@@ -6,6 +6,8 @@ import { AnchorProvider, setProvider, Wallet } from '@coral-xyz/anchor';
 import { Connection, Keypair, PublicKey, Transaction, TransactionInstruction, LAMPORTS_PER_SOL, ComputeBudgetProgram, sendAndConfirmTransaction } from '@solana/web3.js';
 import { TOKEN_PROGRAM_ID, ASSOCIATED_TOKEN_PROGRAM_ID, createAssociatedTokenAccountInstruction} from '@solana/spl-token';
 
+
+
 // load environment variables
 dotenv.config();
 const PRIVATE_KEY = process.env.PRIVATE_KEY;
@@ -92,7 +94,7 @@ async function sendAndConfirmTransactionWrapper(connection, transaction, signers
 }
 
 // buy transaction
-const buyTransaction = async (mintAddress) => {
+const swapTransaction = async (type, mintAddress, amount) => {
 
   // get coin data
   const coinData = await getCoinData(mintAddress);
@@ -141,15 +143,19 @@ const buyTransaction = async (mintAddress) => {
     ));
   }
 
-  // add buy instruction
+  console.log(tokenAccountInfo)
+
+  // // add swap instruction
+  const tokenBalance = amount * 1000000;
+  const solIn = amount;
   const priorityFeeInSol = 0.0001;
-  const solIn = 0.0001;
   const slippageDecimal = 0.25;
   const solInLamports = solIn * LAMPORTS_PER_SOL;
   const tokenOut = Math.floor(solInLamports * coinData["virtual_token_reserves"] / coinData["virtual_sol_reserves"]);
   const solInWithSlippage = solIn * (1 + slippageDecimal);
   const maxSolCost = Math.floor(solInWithSlippage * LAMPORTS_PER_SOL);
-  const keys = [
+  const minSolOutput = Math.floor(tokenBalance * (1 - slippageDecimal) * coinData["virtual_sol_reserves"] / coinData["virtual_token_reserves"]);
+  const keys = type === 'buy' ? [
     { pubkey: new PublicKey("4wTV1YmiEkRvAtNtsSGPtUrqRYQMe5SKy2uB4Jjaxnjf"), isSigner: false, isWritable: false },
     { pubkey: new PublicKey("CebN5WGQ4jvEPvsVU4EoHEpgzq1VV7AbicfhtW4xC9iM"), isSigner: false, isWritable: true },
     { pubkey: mint, isSigner: false, isWritable: false },
@@ -162,12 +168,29 @@ const buyTransaction = async (mintAddress) => {
     { pubkey: new PublicKey("SysvarRent111111111111111111111111111111111"), isSigner: false, isWritable: false },
     { pubkey: PublicKey.findProgramAddressSync([Buffer.from("__event_authority")], programId)[0], isSigner: false, isWritable: false },
     { pubkey: programId, isSigner: false, isWritable: false },
+  ] : [
+    { pubkey: new PublicKey("4wTV1YmiEkRvAtNtsSGPtUrqRYQMe5SKy2uB4Jjaxnjf"), isSigner: false, isWritable: false },
+    { pubkey: new PublicKey("CebN5WGQ4jvEPvsVU4EoHEpgzq1VV7AbicfhtW4xC9iM"), isSigner: false, isWritable: true },
+    { pubkey: mint, isSigner: false, isWritable: false },
+    { pubkey: bondingCurve, isSigner: false, isWritable: true },
+    { pubkey: associatedBondingCurve, isSigner: false, isWritable: true },
+    { pubkey: associatedUser, isSigner: false, isWritable: true },
+    { pubkey: owner.publicKey, isSigner: false, isWritable: true },
+    { pubkey: new PublicKey("11111111111111111111111111111111"), isSigner: false, isWritable: false },
+    { pubkey: new PublicKey("ATokenGPvbdGVxr1b2hvZbsiqW5xWH25efTNsLJA8knL"), isSigner: false, isWritable: false },
+    { pubkey: TOKEN_PROGRAM_ID, isSigner: false, isWritable: false },
+    { pubkey: PublicKey.findProgramAddressSync([Buffer.from("__event_authority")], programId)[0], isSigner: false, isWritable: false },
+    { pubkey: programId, isSigner: false, isWritable: false },
   ];
-  const data = Buffer.concat([
+  const data = type === 'buy' ? Buffer.concat([
     bufferFromUInt64("16927863322537952870"),
     bufferFromUInt64(tokenOut),
     bufferFromUInt64(maxSolCost)
-  ]);
+  ]) : Buffer.concat([
+    bufferFromUInt64("12502976635542562355"),
+    bufferFromUInt64(tokenBalance),
+    bufferFromUInt64(minSolOutput)
+  ])
   const instruction = new TransactionInstruction({
     keys: keys,
     programId,
@@ -177,13 +200,13 @@ const buyTransaction = async (mintAddress) => {
 
   // create and send transaction
   const transaction = await createTransaction(connection, txBuilder.instructions, owner.publicKey, priorityFeeInSol);
-  console.log('Buy transaction created:', transaction);
+  console.log(`${type} transaction created:`, transaction);
 
-  // const signature = await sendAndConfirmTransactionWrapper(connection, transaction, [owner]);
-  // console.log('Buy transaction confirmed:', signature);
+  const signature = await sendAndConfirmTransactionWrapper(connection, transaction, [owner]);
+  console.log('Transaction confirmed:', signature);
 
   // const simulatedResult = await connection.simulateTransaction(transaction);
   // console.log(simulatedResult)
 }
 
-buyTransaction('4oc12QjBrvkSXLWSzs587R97hjCMbr7dBNRyedPMpump');
+swapTransaction('sell', '4oc12QjBrvkSXLWSzs587R97hjCMbr7dBNRyedPMpump', 3542);
