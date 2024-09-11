@@ -1,7 +1,7 @@
 # Pump trader
 Pump.fun sniping bot that can buy and sell tokens.
 
-# Development roadmap
+## Development roadmap
 - [X] Get token info
 - [X] Buy tokens
 - [X] Sell tokens
