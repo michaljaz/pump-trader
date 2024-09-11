@@ -25,7 +25,6 @@ console.log(`Owner address: ${owner.publicKey.toString()}`)
 
 // buysell('FJ9fcU3vyewr2CDBNQnapywSv2v2VXwFTbf42Vm4pump')
 
-
 // function sniper () {
 //   const ws = new WebSocket('wss://frontend-api.pump.fun/socket.io/?EIO=4&transport=websocket')
 
