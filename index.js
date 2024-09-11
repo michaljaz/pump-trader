@@ -22,22 +22,7 @@ console.log(`Owner address: ${owner.publicKey.toString()}`)
 // get coin data
 async function getCoinData (mintStr) {
   try {
-    const url = `https://frontend-api.pump.fun/coins/${mintStr}`
-    const response = await axios.get(url, {
-      headers: {
-        'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:125.0) Gecko/20100101 Firefox/125.0',
-        Accept: '*/*',
-        'Accept-Language': 'en-US,en;q=0.5',
-        'Accept-Encoding': 'gzip, deflate, br',
-        Referer: 'https://www.pump.fun/',
-        Origin: 'https://www.pump.fun',
-        Connection: 'keep-alive',
-        'Sec-Fetch-Dest': 'empty',
-        'Sec-Fetch-Mode': 'cors',
-        'Sec-Fetch-Site': 'cross-site',
-        'If-None-Match': 'W/"43a-tWaCcS4XujSi30IFlxDCJYxkMKg"'
-      }
-    })
+    const response = await axios.get(`https://frontend-api.pump.fun/coins/${mintStr}`)
     if (response.status === 200) {
       return response.data
     } else {
@@ -61,7 +46,7 @@ async function createTransaction (
   })
   const transaction = new Transaction().add(modifyComputeUnits)
   if (priorityFeeInSol > 0) {
-    const microLamports = priorityFeeInSol * 1_000_000_000 // convert SOL to microLamports
+    const microLamports = priorityFeeInSol * 1_000_000_000
     const addPriorityFee = ComputeBudgetProgram.setComputeUnitPrice({
       microLamports
     })
@@ -96,6 +81,7 @@ const swapTransaction = async (type, mintAddress, amount) => {
 
   // get coin data
   const coinData = await getCoinData(mintAddress)
+  console.log(coinData)
 
   // create mint, wallet and pump program
   const mint = new PublicKey(mintAddress)
@@ -248,4 +234,4 @@ ws.on('message', async function (data, flags) {
   }
 })
 
-// swapTransaction('sell', '', 0)
+// swapTransaction('sell', 'AD6tPXsynJLANcJmzAfiv6yhtjRZM2cwB9qY5qHpump', 0)
