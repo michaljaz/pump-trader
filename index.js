@@ -14,6 +14,7 @@ const SOLANA_HTTP_ENDPOINT = process.env.SOLANA_HTTP_ENDPOINT;
 const PUMPFUN_PROGRAM_ID = '6EF8rrecthR5Dkzon8Nwu78hRvfCKubJ14M5uBEwF6P'
 const PUMPFUN_GLOBAL = "4wTV1YmiEkRvAtNtsSGPtUrqRYQMe5SKy2uB4Jjaxnjf"
 const PUMPFUN_FEE_RECIPIENT = 'CebN5WGQ4jvEPvsVU4EoHEpgzq1VV7AbicfhtW4xC9iM'
+const PUMP_MINT = '4oc12QjBrvkSXLWSzs587R97hjCMbr7dBNRyedPMpump';
 
 
 // load keypair
@@ -96,14 +97,14 @@ async function sendAndConfirmTransactionWrapper(connection, transaction, signers
 }
 
 // buy transaction
-const swapTransaction = async (type, mintAddress, amount) => {
+const swapTransaction = async (type, amount) => {
 
   // get coin data
-  const coinData = await getCoinData(mintAddress);
+  const coinData = await getCoinData(PUMP_MINT);
   console.log(coinData);
 
   // create mint, wallet and pump program
-  const mint = new PublicKey(mintAddress)
+  const mint = new PublicKey(PUMP_MINT)
   const wallet = new Wallet(owner);
   const programId = new PublicKey(PUMPFUN_PROGRAM_ID)
 
@@ -211,4 +212,4 @@ const swapTransaction = async (type, mintAddress, amount) => {
   // console.log(simulatedResult)
 }
 
-swapTransaction('sell', '4oc12QjBrvkSXLWSzs587R97hjCMbr7dBNRyedPMpump', 3542);
+swapTransaction('sell', 3542);
