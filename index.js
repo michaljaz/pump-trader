@@ -3,16 +3,18 @@ import dotenv from 'dotenv';
 import base58 from "bs58";
 import axios from 'axios';
 import { AnchorProvider, setProvider, Wallet } from '@coral-xyz/anchor';
-import { Connection, Keypair, PublicKey, Transaction, TransactionInstruction, LAMPORTS_PER_SOL, ComputeBudgetProgram, sendAndConfirmTransaction } from '@solana/web3.js';
+import { Connection, SYSVAR_RENT_PUBKEY, Keypair, PublicKey, Transaction, TransactionInstruction, LAMPORTS_PER_SOL, ComputeBudgetProgram, sendAndConfirmTransaction } from '@solana/web3.js';
 import { TOKEN_PROGRAM_ID, ASSOCIATED_TOKEN_PROGRAM_ID, createAssociatedTokenAccountInstruction} from '@solana/spl-token';
 
-
-
-// load environment variables
+// load environment variables & constants
 dotenv.config();
 const PRIVATE_KEY = process.env.PRIVATE_KEY;
 const SOLANA_WSS_ENDPOINT = process.env.SOLANA_WSS_ENDPOINT;
 const SOLANA_HTTP_ENDPOINT = process.env.SOLANA_HTTP_ENDPOINT;
+const PUMPFUN_PROGRAM_ID = '6EF8rrecthR5Dkzon8Nwu78hRvfCKubJ14M5uBEwF6P'
+const PUMPFUN_GLOBAL = "4wTV1YmiEkRvAtNtsSGPtUrqRYQMe5SKy2uB4Jjaxnjf"
+const PUMPFUN_FEE_RECIPIENT = 'CebN5WGQ4jvEPvsVU4EoHEpgzq1VV7AbicfhtW4xC9iM'
+
 
 // load keypair
 const owner = Keypair.fromSecretKey(base58.decode(PRIVATE_KEY));
@@ -103,7 +105,7 @@ const swapTransaction = async (type, mintAddress, amount) => {
   // create mint, wallet and pump program
   const mint = new PublicKey(mintAddress)
   const wallet = new Wallet(owner);
-  const programId = new PublicKey('6EF8rrecthR5Dkzon8Nwu78hRvfCKubJ14M5uBEwF6P')
+  const programId = new PublicKey(PUMPFUN_PROGRAM_ID)
 
   // create connection and provider
   const connection = new Connection(SOLANA_HTTP_ENDPOINT, { wsEndpoint: SOLANA_WSS_ENDPOINT });
@@ -145,7 +147,7 @@ const swapTransaction = async (type, mintAddress, amount) => {
 
   console.log(tokenAccountInfo)
 
-  // // add swap instruction
+  // add swap instruction
   const tokenBalance = amount * 1000000;
   const solIn = amount;
   const priorityFeeInSol = 0.0001;
@@ -156,8 +158,8 @@ const swapTransaction = async (type, mintAddress, amount) => {
   const maxSolCost = Math.floor(solInWithSlippage * LAMPORTS_PER_SOL);
   const minSolOutput = Math.floor(tokenBalance * (1 - slippageDecimal) * coinData["virtual_sol_reserves"] / coinData["virtual_token_reserves"]);
   const keys = type === 'buy' ? [
-    { pubkey: new PublicKey("4wTV1YmiEkRvAtNtsSGPtUrqRYQMe5SKy2uB4Jjaxnjf"), isSigner: false, isWritable: false },
-    { pubkey: new PublicKey("CebN5WGQ4jvEPvsVU4EoHEpgzq1VV7AbicfhtW4xC9iM"), isSigner: false, isWritable: true },
+    { pubkey: new PublicKey(PUMPFUN_GLOBAL), isSigner: false, isWritable: false },
+    { pubkey: new PublicKey(PUMPFUN_FEE_RECIPIENT), isSigner: false, isWritable: true },
     { pubkey: mint, isSigner: false, isWritable: false },
     { pubkey: bondingCurve, isSigner: false, isWritable: true },
     { pubkey: associatedBondingCurve, isSigner: false, isWritable: true },
@@ -165,19 +167,19 @@ const swapTransaction = async (type, mintAddress, amount) => {
     { pubkey: owner.publicKey, isSigner: false, isWritable: true },
     { pubkey: new PublicKey("11111111111111111111111111111111"), isSigner: false, isWritable: false },
     { pubkey: TOKEN_PROGRAM_ID, isSigner: false, isWritable: false },
-    { pubkey: new PublicKey("SysvarRent111111111111111111111111111111111"), isSigner: false, isWritable: false },
+    { pubkey: new PublicKey(SYSVAR_RENT_PUBKEY), isSigner: false, isWritable: false },
     { pubkey: PublicKey.findProgramAddressSync([Buffer.from("__event_authority")], programId)[0], isSigner: false, isWritable: false },
     { pubkey: programId, isSigner: false, isWritable: false },
   ] : [
-    { pubkey: new PublicKey("4wTV1YmiEkRvAtNtsSGPtUrqRYQMe5SKy2uB4Jjaxnjf"), isSigner: false, isWritable: false },
-    { pubkey: new PublicKey("CebN5WGQ4jvEPvsVU4EoHEpgzq1VV7AbicfhtW4xC9iM"), isSigner: false, isWritable: true },
+    { pubkey: new PublicKey(PUMPFUN_GLOBAL), isSigner: false, isWritable: false },
+    { pubkey: new PublicKey(PUMPFUN_FEE_RECIPIENT), isSigner: false, isWritable: true },
     { pubkey: mint, isSigner: false, isWritable: false },
     { pubkey: bondingCurve, isSigner: false, isWritable: true },
     { pubkey: associatedBondingCurve, isSigner: false, isWritable: true },
     { pubkey: associatedUser, isSigner: false, isWritable: true },
     { pubkey: owner.publicKey, isSigner: false, isWritable: true },
     { pubkey: new PublicKey("11111111111111111111111111111111"), isSigner: false, isWritable: false },
-    { pubkey: new PublicKey("ATokenGPvbdGVxr1b2hvZbsiqW5xWH25efTNsLJA8knL"), isSigner: false, isWritable: false },
+    { pubkey: new PublicKey(ASSOCIATED_TOKEN_PROGRAM_ID), isSigner: false, isWritable: false },
     { pubkey: TOKEN_PROGRAM_ID, isSigner: false, isWritable: false },
     { pubkey: PublicKey.findProgramAddressSync([Buffer.from("__event_authority")], programId)[0], isSigner: false, isWritable: false },
     { pubkey: programId, isSigner: false, isWritable: false },
