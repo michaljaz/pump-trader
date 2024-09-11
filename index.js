@@ -3,7 +3,7 @@ import base58 from 'bs58'
 import WebSocket from 'ws'
 import { AnchorProvider, setProvider, Wallet } from '@coral-xyz/anchor'
 import { Connection, Keypair } from '@solana/web3.js'
-import { pumpBuy, pumpSell } from './lib/pump.js'
+import { pumpBuy, pumpSell, pumpCheck } from './lib/pump.js'
 
 dotenv.config()
 const PRIVATE_KEY = process.env.PRIVATE_KEY
