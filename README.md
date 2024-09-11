@@ -5,7 +5,7 @@ Pump.fun sniping bot that can buy and sell tokens.
 - buy and sell transaction costs 0.000145 SOL to network
 - pump.fun fee is paid only when buying (~0,00001 SOL)
 - on first buy you have to create associated token account that costs 0.00203928 SOL
-- transaction confirmation time
+- transaction confirmation time around 10 seconds (could be super fast, but with only broadcast)
 
 ## Development roadmap
 - [X] Get token info
