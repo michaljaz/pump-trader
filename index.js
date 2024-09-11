@@ -23,7 +23,8 @@ console.log(`Owner address: ${owner.publicKey.toString()}`)
 //     await pumpSell(connection, owner, mintStr, 0)
 // }
 
-// buysell('FJ9fcU3vyewr2CDBNQnapywSv2v2VXwFTbf42Vm4pump')
+// pumpSell(connection, owner, 'FJ9fcU3vyewr2CDBNQnapywSv2v2VXwFTbf42Vm4pump', 0)
+// buysell()
 
 // function sniper () {
 //   const ws = new WebSocket('wss://frontend-api.pump.fun/socket.io/?EIO=4&transport=websocket')
