@@ -3,7 +3,8 @@
   "version": "1.0.0",
   "main": "index.js",
   "scripts": {
-    "start": "node index.js"
+    "start": "node index.js",
+    "standard": "standard --fix index.js"
   },
   "keywords": [
     "solana",
@@ -23,6 +24,7 @@
     "axios": "^1.7.4",
     "bs58": "^6.0.0",
     "dotenv": "^16.4.5",
+    "standard": "^17.1.0",
     "ws": "^8.18.0"
   }
 }
