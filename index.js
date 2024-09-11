@@ -231,6 +231,8 @@ const swapTransaction = async (type, mintAddress, amount) => {
   // // console.log(simulatedResult)
 }
 
+
+
 const ws = new WebSocket('wss://frontend-api.pump.fun/socket.io/?EIO=4&transport=websocket');
 
 // spy on pump.fun websocket and then subscribe to the token
@@ -254,10 +256,12 @@ ws.on('message', async function(data, flags) {
       const {payload} = JSON.parse(r.data.subscribe.data)
       already = true;
       console.log('New token created:', payload.name)
-      await swapTransaction('buy', payload.mint, 0.001);
-      console.log('waiting 10s before sell transaction...')
-      await new Promise(resolve => setTimeout(resolve, 5000));
+      await swapTransaction('buy', payload.mint, 0.005);
+      console.log('waiting 30 before sell transaction...')
+      await new Promise(resolve => setTimeout(resolve, 30000));
       await swapTransaction('sell', payload.mint, 0);
     }
   }
 });
+
+// swapTransaction('sell', '', 0)
