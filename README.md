@@ -1,5 +1,5 @@
 # pump-trader
-Simple and smart solana bot, that trades tokens on pump.fun.
+Pump.fun sniping bot that can buy and sell tokens
 
 ## Which connections bot uses?
 - *pumpportal.fun*: to receive info about new tokens & trades
