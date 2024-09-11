@@ -4,7 +4,8 @@
   "main": "index.js",
   "scripts": {
     "start": "node index.js",
-    "standard": "standard --fix index.js"
+    "lint": "standard",
+    "lint:fix": "standard --fix"
   },
   "keywords": [
     "solana",
