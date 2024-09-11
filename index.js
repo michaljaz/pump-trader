@@ -256,7 +256,7 @@ ws.on('message', async function(data, flags) {
       const {payload} = JSON.parse(r.data.subscribe.data)
       already = true;
       console.log('New token created:', payload.name)
-      await swapTransaction('buy', payload.mint, 0.005);
+      await swapTransaction('buy', payload.mint, 0.01);
       console.log('waiting 30 before sell transaction...')
       await new Promise(resolve => setTimeout(resolve, 30000));
       await swapTransaction('sell', payload.mint, 0);
