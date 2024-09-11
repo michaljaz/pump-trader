@@ -2,9 +2,10 @@
 import dotenv from 'dotenv';
 import base58 from "bs58";
 import axios from 'axios';
+import WebSocket from 'ws';
 import { AnchorProvider, setProvider, Wallet } from '@coral-xyz/anchor';
 import { Connection, SYSVAR_RENT_PUBKEY, Keypair, PublicKey, Transaction, TransactionInstruction, LAMPORTS_PER_SOL, ComputeBudgetProgram, sendAndConfirmTransaction } from '@solana/web3.js';
-import { TOKEN_PROGRAM_ID, ASSOCIATED_TOKEN_PROGRAM_ID, createAssociatedTokenAccountInstruction} from '@solana/spl-token';
+import { TOKEN_PROGRAM_ID, ASSOCIATED_TOKEN_PROGRAM_ID, createAssociatedTokenAccountInstruction, AccountLayout} from '@solana/spl-token';
 
 // load environment variables & constants
 dotenv.config();
@@ -14,7 +15,6 @@ const SOLANA_HTTP_ENDPOINT = process.env.SOLANA_HTTP_ENDPOINT;
 const PUMPFUN_PROGRAM_ID = '6EF8rrecthR5Dkzon8Nwu78hRvfCKubJ14M5uBEwF6P'
 const PUMPFUN_GLOBAL = "4wTV1YmiEkRvAtNtsSGPtUrqRYQMe5SKy2uB4Jjaxnjf"
 const PUMPFUN_FEE_RECIPIENT = 'CebN5WGQ4jvEPvsVU4EoHEpgzq1VV7AbicfhtW4xC9iM'
-const PUMP_MINT = '4oc12QjBrvkSXLWSzs587R97hjCMbr7dBNRyedPMpump';
 
 
 // load keypair
@@ -97,14 +97,17 @@ async function sendAndConfirmTransactionWrapper(connection, transaction, signers
 }
 
 // buy transaction
-const swapTransaction = async (type, amount) => {
+const swapTransaction = async (type, mintAddress, amount) => {
+
+  
+
+  console.log(`Initiating ${type} transaction for mint: ${mintAddress} with amount: ${amount}`);
 
   // get coin data
-  const coinData = await getCoinData(PUMP_MINT);
-  console.log(coinData);
+  const coinData = await getCoinData(mintAddress);
 
   // create mint, wallet and pump program
-  const mint = new PublicKey(PUMP_MINT)
+  const mint = new PublicKey(mintAddress)
   const wallet = new Wallet(owner);
   const programId = new PublicKey(PUMPFUN_PROGRAM_ID)
 
@@ -112,6 +115,24 @@ const swapTransaction = async (type, amount) => {
   const connection = new Connection(SOLANA_HTTP_ENDPOINT, { wsEndpoint: SOLANA_WSS_ENDPOINT });
   const provider = new AnchorProvider(connection, wallet, AnchorProvider.defaultOptions());
   setProvider(provider);
+
+  if (amount === 0) {
+    const tokenAccounts = await connection.getTokenAccountsByOwner(owner.publicKey, { programId: new PublicKey("TokenkegQfeZyiNwAJbNbGKPFXCWuBvf9Ss623VQ5DA") });
+    const tokens = tokenAccounts.value.map(accountInfo => {
+      const accountData = AccountLayout.decode(accountInfo.account.data);
+      return {
+        mint: new PublicKey(accountData.mint),
+        amount: Number(BigInt(accountData.amount.toString())) / 10 ** 6 // Fetch the raw amount as BigInt
+      };
+    });
+    const token = tokens.find(token => token.mint.toString() === mint.toString())
+    if (token) {
+      amount = token.amount;
+      console.log(amount)
+    } else {
+      return;
+    }
+  }
 
   // find bonding curve address
   const [bondingCurve] = PublicKey.findProgramAddressSync(
@@ -145,8 +166,6 @@ const swapTransaction = async (type, amount) => {
         mint
     ));
   }
-
-  console.log(tokenAccountInfo)
 
   // add swap instruction
   const tokenBalance = amount * 1000000;
@@ -203,13 +222,42 @@ const swapTransaction = async (type, amount) => {
 
   // create and send transaction
   const transaction = await createTransaction(connection, txBuilder.instructions, owner.publicKey, priorityFeeInSol);
-  console.log(`${type} transaction created:`, transaction);
+  console.log(`${type} transaction created`);
 
   const signature = await sendAndConfirmTransactionWrapper(connection, transaction, [owner]);
-  console.log('Transaction confirmed:', signature);
+  console.log(`Transaction confirmed: https://solscan.io/tx/${signature}`);
 
-  // const simulatedResult = await connection.simulateTransaction(transaction);
-  // console.log(simulatedResult)
+  // // const simulatedResult = await connection.simulateTransaction(transaction);
+  // // console.log(simulatedResult)
 }
 
-swapTransaction('sell', 3542);
+const ws = new WebSocket('wss://frontend-api.pump.fun/socket.io/?EIO=4&transport=websocket');
+
+// spy on pump.fun websocket and then subscribe to the token
+
+ws.on('open', function() {
+    console.log('Listening for new token creation on pump.fun...')
+});
+
+let already = false
+
+ws.on('message', async function(data, flags) {
+  const message = data.toString()
+  if(message.startsWith('0')){
+    ws.send(40)
+  }else if(message === '2'){
+    ws.send(3)
+  }else if(message.startsWith('42')) {
+    const [type, r] = JSON.parse(message.slice(2))
+    
+    if (type === 'newCoinCreated' && !already) {
+      const {payload} = JSON.parse(r.data.subscribe.data)
+      already = true;
+      console.log('New token created:', payload.name)
+      await swapTransaction('buy', payload.mint, 0.001);
+      console.log('waiting 10s before sell transaction...')
+      await new Promise(resolve => setTimeout(resolve, 5000));
+      await swapTransaction('sell', payload.mint, 0);
+    }
+  }
+});
