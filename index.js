@@ -22,9 +22,9 @@ async function check () {
   const signatures = await connection.getSignaturesForAddress(owner.publicKey)
   for (const signature of signatures) {
     try {
-      await pumpCheck(connection, signature.signature)
+      await pumpCheck(connection, owner, signature.signature)
     } catch (e) { }
-    await new Promise(resolve => setTimeout(resolve, 200))
+    await new Promise(resolve => setTimeout(resolve, 100))
   }
 }
 check()
