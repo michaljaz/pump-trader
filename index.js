@@ -18,6 +18,12 @@ setProvider(provider)
 
 console.log(`Owner address: ${owner.publicKey.toString()}`)
 
+
+
+// const mint = ""
+// pumpBuy(connection, owner, mint, 0.03)
+// pumpSell(connection, owner, mint, 0)
+
 async function check () {
   const signatures = await connection.getSignaturesForAddress(owner.publicKey)
   for (const signature of signatures) {
@@ -28,6 +34,7 @@ async function check () {
   }
 }
 check()
+
 
 // async function buysell(mintStr) {
 //     await pumpBuy(connection, owner, mintStr, 0.001)
