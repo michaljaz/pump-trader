@@ -1,7 +1,7 @@
-![image](https://github.com/user-attachments/assets/e02f40c7-ccee-4cbe-bacb-1fe79c31e4b7)
-
+![Zrzut ekranu 2024-09-23 121249](https://github.com/user-attachments/assets/f30fff47-783e-4b35-a794-10ecd3453f29)
 
 # Pump trader
+
 Pump.fun sniping bot that can buy and sell tokens.
 
 ## Trading rules
