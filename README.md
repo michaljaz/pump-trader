@@ -1,3 +1,6 @@
+![image](https://github.com/user-attachments/assets/e02f40c7-ccee-4cbe-bacb-1fe79c31e4b7)
+
+
 # Pump trader
 Pump.fun sniping bot that can buy and sell tokens.
 
